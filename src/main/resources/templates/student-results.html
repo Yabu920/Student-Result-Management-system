@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal - Published Results</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <h1>Student Result Management System</h1>
+        <nav>
+            <a th:href="@{/login}">Staff Login</a>
+        </nav>
+    </div>
+</header>
+<main>
+    <section class="panel">
+        <h1>Official Student Result Portal</h1>
+        <p>Enter your assigned University Student Identification Number below to look up your verified, published academic results.</p>
+        <form th:action="@{/student-results}" method="get">
+            <div class="form-row">
+                <div style="flex: 1; min-width: 260px;">
+                    <label for="studentNumber">Student Identification Number
+                        <input id="studentNumber" name="studentNumber" th:value="${studentNumber}" placeholder="e.g. STU-001" required autofocus>
+                    </label>
+                </div>
+                <div>
+                    <button id="searchResults" type="submit">View Published Results</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel" th:if="${results != null}">
+        <h2>Published Academic Results</h2>
+        <div class="table-container">
+            <table id="studentResultsTable">
+                <thead>
+                    <tr>
+                        <th>Course Code</th>
+                        <th>Final Mark</th>
+                        <th>Awarded Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="result : ${results}"
+                        class="student-result-row"
+                        th:attr="data-course-code=${result.course.courseCode},data-mark=${result.mark},data-grade=${result.grade}">
+                        <td class="course-code" th:text="${result.course.courseCode}"></td>
+                        <td class="mark" th:text="${result.mark}"></td>
+                        <td><span class="grade" th:text="${result.grade}"></span></td>
+                    </tr>
+                    <tr th:if="${results.empty}">
+                        <td colspan="3" class="empty-state">No published results found for this student ID. Results that are in draft or under review are not visible.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

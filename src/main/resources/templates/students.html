@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Directory - Student Result Management System</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: header}"></div>
+<main>
+    <section class="panel">
+        <h2>Register New Student</h2>
+        <p>Add a student to the academic database and configure enrollment status.</p>
+        <form th:action="@{/students}" th:object="${student}" method="post">
+            <div class="form-grid">
+                <label for="studentNumber">Student Number
+                    <input id="studentNumber" th:field="*{studentNumber}" placeholder="e.g. STU-100" required>
+                </label>
+                <label for="fullName">Full Name
+                    <input id="fullName" th:field="*{fullName}" placeholder="e.g. John Doe" required>
+                </label>
+                <label for="active" style="padding-bottom: 8px;">
+                    <input id="active" type="checkbox" th:field="*{active}">
+                    <span>Active Enrollment</span>
+                </label>
+                <div>
+                    <button id="saveStudent" type="submit">Save Student</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Registered Students</h2>
+        <div class="table-container">
+            <table id="studentsTable">
+                <thead>
+                    <tr>
+                        <th>Student Number</th>
+                        <th>Full Name</th>
+                        <th>Enrollment Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="student : ${students}">
+                        <td class="student-number" th:text="${student.studentNumber}"></td>
+                        <td th:text="${student.fullName}"></td>
+                        <td>
+                            <span class="status" th:text="${student.active ? 'ACTIVE' : 'INACTIVE'}"></span>
+                        </td>
+                    </tr>
+                    <tr th:if="${students.empty}">
+                        <td colspan="3" class="empty-state">No students found. Register a student above.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Catalog - Student Result Management System</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: header}"></div>
+<main>
+    <section class="panel">
+        <h2>Add Course</h2>
+        <p>Register a course into the curriculum catalog.</p>
+        <form th:action="@{/courses}" th:object="${course}" method="post">
+            <div class="form-grid">
+                <label for="courseCode">Course Code
+                    <input id="courseCode" th:field="*{courseCode}" placeholder="e.g. SE505" required>
+                </label>
+                <label for="courseTitle">Course Title
+                    <input id="courseTitle" th:field="*{courseTitle}" placeholder="e.g. Software Architecture" required>
+                </label>
+                <label for="creditHour">Credit Hours
+                    <input id="creditHour" type="number" min="1" max="10" th:field="*{creditHour}" placeholder="e.g. 3" required>
+                </label>
+                <div>
+                    <button id="saveCourse" type="submit">Save Course</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Course Catalog</h2>
+        <div class="table-container">
+            <table id="coursesTable">
+                <thead>
+                    <tr>
+                        <th>Course Code</th>
+                        <th>Course Title</th>
+                        <th>Credit Hours</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="course : ${courses}">
+                        <td class="course-code" th:text="${course.courseCode}"></td>
+                        <td th:text="${course.courseTitle}"></td>
+                        <td th:text="${course.creditHour}"></td>
+                    </tr>
+                    <tr th:if="${courses.empty}">
+                        <td colspan="3" class="empty-state">No courses found. Add a course above.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Student Result Management System</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="login-wrapper">
+    <section class="login-card">
+        <div class="login-header">
+            <h1>Sign In</h1>
+            <p>Student Result Management System</p>
+        </div>
+        <p th:if="${param.error}" class="error">Invalid username or password.</p>
+        <p th:if="${param.logout}" class="message">You have been successfully logged out.</p>
+        <form th:action="@{/login}" method="post">
+            <label for="username">Username
+                <input id="username" name="username" type="text" placeholder="e.g. admin" required autofocus>
+            </label>
+            <label for="password">Password
+                <input id="password" name="password" type="password" placeholder="Enter password" required>
+            </label>
+            <button id="loginButton" type="submit">Sign In</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

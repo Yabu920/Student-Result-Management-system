@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Student Result Management System</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: header}"></div>
+<main>
+    <section class="panel">
+        <h2>Dashboard</h2>
+        <p>Welcome to the administrative portal. Select a module below or use the top navigation to manage students, courses, and marks workflow.</p>
+        
+        <div class="dashboard-grid">
+            <a th:href="@{/students}" class="dashboard-card">
+                <div class="dashboard-card-title">
+                    <span>Manage Students</span>
+                    <span class="dashboard-card-arrow">→</span>
+                </div>
+                <p class="dashboard-card-desc">Register new students, update active/inactive enrollment status.</p>
+            </a>
+
+            <a th:href="@{/courses}" class="dashboard-card">
+                <div class="dashboard-card-title">
+                    <span>Manage Courses</span>
+                    <span class="dashboard-card-arrow">→</span>
+                </div>
+                <p class="dashboard-card-desc">Define course curricula, credit hours, and course codes.</p>
+            </a>
+
+            <a th:href="@{/results}" class="dashboard-card">
+                <div class="dashboard-card-title">
+                    <span>Results & Workflow</span>
+                    <span class="dashboard-card-arrow">→</span>
+                </div>
+                <p class="dashboard-card-desc">Record raw marks, calculate grades, submit, review, and publish.</p>
+            </a>
+
+            <a th:href="@{/student-results}" class="dashboard-card">
+                <div class="dashboard-card-title">
+                    <span>Public Student Portal</span>
+                    <span class="dashboard-card-arrow">→</span>
+                </div>
+                <p class="dashboard-card-desc">Preview official published result transcripts available to students.</p>
+            </a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

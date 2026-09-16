@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results & Workflow - Student Result Management System</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: header}"></div>
+<main>
+    <p th:if="${message}" class="message" th:text="${message}"></p>
+    <p th:if="${error}" class="error" th:text="${error}"></p>
+
+    <section class="panel">
+        <h2>Enter Result</h2>
+        <p>Input candidate marks. Grade calculation and initial draft creation are handled automatically.</p>
+        <form th:action="@{/results}" method="post">
+            <div class="form-grid">
+                <label for="studentId">Student
+                    <select id="studentId" name="studentId" required>
+                        <option th:each="student : ${students}" th:value="${student.id}" th:text="${student.studentNumber + ' - ' + student.fullName}"></option>
+                    </select>
+                </label>
+                <label for="courseId">Course
+                    <select id="courseId" name="courseId" required>
+                        <option th:each="course : ${courses}" th:value="${course.id}" th:text="${course.courseCode + ' - ' + course.courseTitle}"></option>
+                    </select>
+                </label>
+                <label for="mark">Mark (0 - 100)
+                    <input id="mark" name="mark" type="number" min="0" max="100" placeholder="e.g. 85" required>
+                </label>
+                <div>
+                    <button id="saveResult" type="submit">Save Draft</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Result Workflow Management</h2>
+        <p>Review current candidate marks, audit status transitions, and authorize official publication.</p>
+        <div class="table-container">
+            <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th>Student Number</th>
+                        <th>Course Code</th>
+                        <th>Mark</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                        <th>Transition Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="result : ${results}"
+                        class="result-row"
+                        th:attr="data-result-id=${result.id},data-student-number=${result.student.studentNumber},data-course-code=${result.course.courseCode},data-mark=${result.mark}">
+                        <td class="student-number" th:text="${result.student.studentNumber}"></td>
+                        <td class="course-code" th:text="${result.course.courseCode}"></td>
+                        <td class="mark" th:text="${result.mark}"></td>
+                        <td><span class="grade" th:text="${result.grade}"></span></td>
+                        <td><span class="status" th:text="${result.status}"></span></td>
+                        <td>
+                            <form th:action="@{/results/status}" method="post">
+                                <input type="hidden" name="resultId" th:value="${result.id}">
+                                <select class="target-status" name="targetStatus">
+                                    <option value="SUBMITTED">Submit for Review</option>
+                                    <option value="DRAFT">Return to Draft</option>
+                                    <option value="REVIEWED">Mark as Reviewed</option>
+                                    <option value="PUBLISHED">Authorize Publication</option>
+                                </select>
+                                <button class="changeStatus" type="submit">Apply</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${results.empty}">
+                        <td colspan="6" class="empty-state">No results entered yet. Add a student result above.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>
