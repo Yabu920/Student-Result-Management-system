@@ -1,22 +1,3 @@
-# Student Result Management and Publication System
-
-## Course Information
-
-- **Course:** Software Testing and Validation
-- **Institution:** Addis Ababa University, School of Information Technology and Engineering
-- **Instructor:** Abel Tadesse
-- **Project:** Final Project: A Complete Testing Effort
-
-## Group Members & Student IDs
-
-| Full Name | Student ID | Role in Testing Effort |
-|---|---|---|
-| Member 1 (Replace with your name) | ATR/0001/14 | Test Lead & QA Architect (Planning, Defect Governance, Reflection) |
-| Member 2 (Replace with your name) | ATR/0002/14 | Unit & Integration Test Engineer (EP, BVA, Decision Table, Mockito) |
-| Member 3 (Replace with your name) | ATR/0003/14 | Automation Engineer (Selenium WebDriver, Page Object Model) |
-| Member 4 (Replace with your name) | ATR/0004/14 | DevOps & CI/CD Engineer (GitHub Actions, Jenkins, Docker, Regression) |
-
----
 
 ## Project Description
 
@@ -66,7 +47,7 @@ This is an enterprise-grade, lightweight Spring Boot web application for managin
 
 ## How to Run the Application
 
-```bash
+```
 mvn spring-boot:run
 ```
 
@@ -82,13 +63,13 @@ Open [http://localhost:8080](http://localhost:8080) in your browser:
 
 ### 1. Run Unit & Integration Tests (Surefire)
 
-```bash
+```
 mvn test
 ```
 
 ### 2. Run Full Verification with Selenium System Tests & Coverage (Failsafe)
 
-```bash
+```
 mvn clean verify -Psystem-tests
 ```
 
@@ -128,12 +109,10 @@ Defined in `Jenkinsfile` as a 7-stage declarative pipeline:
 
 To run Jenkins locally via Docker:
 
-```bash
-docker compose -f docker-compose.jenkins.yml up --build
 ```
+docker compose -f docker-compose.jenkins.yml up --build
 
----
-
+```
 ## Regression Testing Demonstration
 
 To demonstrate regression detection in accordance with course requirements:
@@ -142,13 +121,4 @@ To demonstrate regression detection in accordance with course requirements:
 3. **Regression Detection:** `GradeServiceTest.java` immediately fails on boundary input `50` (returns `"D"` instead of `"C"`). `ResultServiceTest` and `StudentResultSystemTest` also fail.
 4. **Fix & Verification:** Relational operator restored to `>= 50`, returning pipeline to green.
 
----
 
-## Formal Documentation
-
-All project documentation is located in the `docs/` directory:
-- [`docs/Test-Plan.md`](docs/Test-Plan.md): Part A - Scope, approach, criteria, risk prioritization, schedule, roles.
-- [`docs/Test-Design-Document.md`](docs/Test-Design-Document.md): Part B - Formal derivations for EP, BVA, Decision Table, and State Machine.
-- [`docs/Defect-Log-and-Metrics.md`](docs/Defect-Log-and-Metrics.md): Parts F & G - Defect log, lifecycle, Defect Density, DRE, coverage interpretations.
-- [`docs/Test-Summary-and-Reflection.md`](docs/Test-Summary-and-Reflection.md): Parts H & I - Results against criteria, residual risk, release recommendation, Error-Fault-Failure reflection.
-- [`docs/Full-Test-Report.docx`](docs/Full-Test-Report.docx): Complete compiled report document.
