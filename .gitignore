@@ -3,3 +3,6 @@ target/
 .idea/
 .vscode/
 *.iml
+
+# Microsoft Office temporary lock files
+.~lock.*#
