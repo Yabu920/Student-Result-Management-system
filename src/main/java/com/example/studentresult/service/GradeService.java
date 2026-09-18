@@ -34,7 +34,7 @@ public class GradeService {
         if (mark >= 60) {
             return "C+";
         }
-        if (mark > 50) {
+        if (mark >= 50) {
             return "C";
         }
         if (mark >= 40) {
