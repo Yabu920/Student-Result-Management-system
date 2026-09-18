@@ -8,6 +8,7 @@ on:
 jobs:
   selenium-test-and-evidence:
     runs-on: ubuntu-latest
+
     env:
       DISPLAY: ':99'
       SELENIUM_DEMO_DELAY_MS: '1000'
@@ -17,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -34,49 +35,100 @@ jobs:
       - name: Verify Google Chrome
         run: google-chrome --version
 
+      - name: Install Xvfb and ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb ffmpeg
+
       - name: Verify Xvfb
-        run: Xvfb -version 2>&1 | head -n 1
+        run: |
+          command -v Xvfb
+          echo "Xvfb is installed"
 
       - name: Verify ffmpeg
-        run: ffmpeg -version | head -n 1
+        run: |
+          ffmpeg -version | head -n 1
 
       - name: Start Xvfb virtual display
         run: |
           mkdir -p artifacts
-          Xvfb :99 -screen 0 1920x1080x24 > artifacts/xvfb.log 2>&1 &
+
+          Xvfb :99 -screen 0 1920x1080x24 \
+            > artifacts/xvfb.log 2>&1 &
+
           echo $! > artifacts/xvfb.pid
           sleep 2
-          kill -0 "$(cat artifacts/xvfb.pid)"
+
+          if ! kill -0 "$(cat artifacts/xvfb.pid)" 2>/dev/null; then
+            echo "Xvfb failed to start."
+            cat artifacts/xvfb.log
+            exit 1
+          fi
+
+          echo "Xvfb started successfully on DISPLAY=:99"
 
       - name: Start Selenium screen recording
         run: |
-          ffmpeg -y -video_size 1920x1080 -framerate 12 \
-            -f x11grab -i :99.0 -c:v libx264 -preset ultrafast \
-            -pix_fmt yuv420p artifacts/selenium-demo.mp4 \
+          ffmpeg -y \
+            -video_size 1920x1080 \
+            -framerate 12 \
+            -f x11grab \
+            -i :99.0 \
+            -c:v libx264 \
+            -preset ultrafast \
+            -pix_fmt yuv420p \
+            artifacts/selenium-demo.mp4 \
             > artifacts/ffmpeg.log 2>&1 &
+
           echo $! > artifacts/ffmpeg.pid
           sleep 2
-          kill -0 "$(cat artifacts/ffmpeg.pid)"
+
+          if ! kill -0 "$(cat artifacts/ffmpeg.pid)" 2>/dev/null; then
+            echo "ffmpeg failed to start."
+            cat artifacts/ffmpeg.log
+            exit 1
+          fi
+
+          echo "Selenium screen recording started."
 
       - name: Run unit, integration, Selenium, and coverage verification
         id: maven_verify
         continue-on-error: true
-        run: mvn clean -Psystem-tests verify
+        run: |
+          mvn clean -Psystem-tests verify
 
       - name: Finalize Selenium screen recording
         if: always()
         run: |
-          if [ -f artifacts/ffmpeg.pid ] && kill -0 "$(cat artifacts/ffmpeg.pid)" 2>/dev/null; then
-            kill -INT "$(cat artifacts/ffmpeg.pid)"
-            for attempt in {1..20}; do
-              kill -0 "$(cat artifacts/ffmpeg.pid)" 2>/dev/null || break
-              sleep 1
-            done
+          if [ -f artifacts/ffmpeg.pid ]; then
+            FFMPEG_PID="$(cat artifacts/ffmpeg.pid)"
+
+            if kill -0 "$FFMPEG_PID" 2>/dev/null; then
+              echo "Stopping ffmpeg recording..."
+              kill -INT "$FFMPEG_PID"
+
+              for attempt in {1..20}; do
+                if ! kill -0 "$FFMPEG_PID" 2>/dev/null; then
+                  break
+                fi
+                sleep 1
+              done
+            fi
           fi
+
           if [ ! -s artifacts/selenium-demo.mp4 ]; then
-            echo "Selenium video was not created; inspect artifacts/ffmpeg.log and artifacts/xvfb.log."
+            echo "Selenium video was not created."
+            echo "---- ffmpeg log ----"
+            cat artifacts/ffmpeg.log || true
+
+            echo "---- Xvfb log ----"
+            cat artifacts/xvfb.log || true
+
             exit 1
           fi
+
+          echo "Selenium video created successfully."
+          ls -lh artifacts/selenium-demo.mp4
 
       - name: Upload Selenium video and display logs
         if: always()
@@ -117,6 +169,9 @@ jobs:
         if: always()
         run: |
           if [ "${{ steps.maven_verify.outcome }}" != "success" ]; then
-            echo "Maven verification failed; marking the workflow as failed."
+            echo "Maven verification failed."
+            echo "The workflow will be marked as failed."
             exit 1
           fi
+
+          echo "Maven verification passed successfully."
