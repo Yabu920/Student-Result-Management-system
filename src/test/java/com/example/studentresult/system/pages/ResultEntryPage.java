@@ -1,6 +1,7 @@
 package com.example.studentresult.system.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -23,6 +24,7 @@ public class ResultEntryPage {
     public void open(String baseUrl) {
         driver.get(baseUrl + "/results");
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("mark")));
+        DemoPause.pause();
     }
 
     public void enterFirstStudentResult(int mark) {
@@ -33,20 +35,26 @@ public class ResultEntryPage {
         selectOptionContaining(By.id("studentId"), studentNumber);
         selectOptionContaining(By.id("courseId"), courseCode);
         WebElement markInput = driver.findElement(By.id("mark"));
+        allowServerValidationOf(markInput, mark);
         markInput.clear();
         markInput.sendKeys(String.valueOf(mark));
+        DemoPause.pause();
         driver.findElement(By.id("saveResult")).click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.message, p.error, #mark")));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.message, p.error")));
+        DemoPause.pause();
     }
 
     public void createResultByIndex(int studentIndex, int courseIndex, int mark) {
         new Select(driver.findElement(By.id("studentId"))).selectByIndex(studentIndex);
         new Select(driver.findElement(By.id("courseId"))).selectByIndex(courseIndex);
         WebElement markInput = driver.findElement(By.id("mark"));
+        allowServerValidationOf(markInput, mark);
         markInput.clear();
         markInput.sendKeys(String.valueOf(mark));
+        DemoPause.pause();
         driver.findElement(By.id("saveResult")).click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.message, p.error, #mark")));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.message, p.error")));
+        DemoPause.pause();
     }
 
     public String firstGrade() {
@@ -70,8 +78,9 @@ public class ResultEntryPage {
         Select statusSelect = new Select(row.findElement(By.cssSelector(".target-status")));
         statusSelect.selectByValue(targetStatus);
         row.findElement(By.cssSelector(".changeStatus")).click();
-        wait.until(ExpectedConditions.stalenessOf(row));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.message, p.error")));
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("mark")));
+        DemoPause.pause();
     }
 
     public String errorMessage() {
@@ -100,5 +109,14 @@ public class ResultEntryPage {
             }
         }
         throw new IllegalArgumentException("No select option contains: " + text);
+    }
+
+    private void allowServerValidationOf(WebElement markInput, int mark) {
+        if (mark < 0 || mark > 100) {
+            ((JavascriptExecutor) driver).executeScript(
+                    "arguments[0].removeAttribute('min'); arguments[0].removeAttribute('max');",
+                    markInput
+            );
+        }
     }
 }

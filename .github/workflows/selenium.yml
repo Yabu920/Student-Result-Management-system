@@ -1,0 +1,122 @@
+name: Full Selenium CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  selenium-test-and-evidence:
+    runs-on: ubuntu-latest
+    env:
+      DISPLAY: ':99'
+      SELENIUM_DEMO_DELAY_MS: '1000'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Verify Maven and Java
+        run: |
+          mvn --version
+          java -version
+
+      - name: Set up Google Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Verify Google Chrome
+        run: google-chrome --version
+
+      - name: Verify Xvfb
+        run: Xvfb -version 2>&1 | head -n 1
+
+      - name: Verify ffmpeg
+        run: ffmpeg -version | head -n 1
+
+      - name: Start Xvfb virtual display
+        run: |
+          mkdir -p artifacts
+          Xvfb :99 -screen 0 1920x1080x24 > artifacts/xvfb.log 2>&1 &
+          echo $! > artifacts/xvfb.pid
+          sleep 2
+          kill -0 "$(cat artifacts/xvfb.pid)"
+
+      - name: Start Selenium screen recording
+        run: |
+          ffmpeg -y -video_size 1920x1080 -framerate 12 \
+            -f x11grab -i :99.0 -c:v libx264 -preset ultrafast \
+            -pix_fmt yuv420p artifacts/selenium-demo.mp4 \
+            > artifacts/ffmpeg.log 2>&1 &
+          echo $! > artifacts/ffmpeg.pid
+          sleep 2
+          kill -0 "$(cat artifacts/ffmpeg.pid)"
+
+      - name: Run unit, integration, Selenium, and coverage verification
+        id: maven_verify
+        continue-on-error: true
+        run: mvn clean -Psystem-tests verify
+
+      - name: Finalize Selenium screen recording
+        if: always()
+        run: |
+          if [ -f artifacts/ffmpeg.pid ] && kill -0 "$(cat artifacts/ffmpeg.pid)" 2>/dev/null; then
+            kill -INT "$(cat artifacts/ffmpeg.pid)"
+            for attempt in {1..20}; do
+              kill -0 "$(cat artifacts/ffmpeg.pid)" 2>/dev/null || break
+              sleep 1
+            done
+          fi
+          if [ ! -s artifacts/selenium-demo.mp4 ]; then
+            echo "Selenium video was not created; inspect artifacts/ffmpeg.log and artifacts/xvfb.log."
+            exit 1
+          fi
+
+      - name: Upload Selenium video and display logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-video
+          path: |
+            artifacts/selenium-demo.mp4
+            artifacts/ffmpeg.log
+            artifacts/xvfb.log
+          if-no-files-found: warn
+
+      - name: Upload Surefire reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
+          if-no-files-found: warn
+
+      - name: Upload Failsafe reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failsafe-reports
+          path: target/failsafe-reports/
+          if-no-files-found: warn
+
+      - name: Upload JaCoCo report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+          if-no-files-found: warn
+
+      - name: Enforce Maven verification result
+        if: always()
+        run: |
+          if [ "${{ steps.maven_verify.outcome }}" != "success" ]; then
+            echo "Maven verification failed; marking the workflow as failed."
+            exit 1
+          fi

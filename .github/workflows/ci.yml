@@ -1,4 +1,4 @@
-name: CI
+name: Fast CI
 
 on:
   push:
@@ -18,11 +18,13 @@ jobs:
           java-version: '17'
           cache: maven
 
-      - name: Set up Chrome
-        uses: browser-actions/setup-chrome@v1
+      - name: Verify Maven and Java
+        run: |
+          mvn --version
+          java -version
 
-      - name: Build, test, run Selenium, and check coverage
-        run: mvn clean -Psystem-tests verify
+      - name: Run unit and integration tests with coverage
+        run: mvn clean verify
 
       - name: Upload JaCoCo report
         uses: actions/upload-artifact@v4

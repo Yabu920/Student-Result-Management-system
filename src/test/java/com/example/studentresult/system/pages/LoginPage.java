@@ -20,12 +20,15 @@ public class LoginPage {
     public void open(String baseUrl) {
         driver.get(baseUrl + "/login");
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("username")));
+        DemoPause.pause();
     }
 
     public void login(String username, String password) {
         driver.findElement(By.id("username")).sendKeys(username);
         driver.findElement(By.id("password")).sendKeys(password);
+        DemoPause.pause();
         driver.findElement(By.id("loginButton")).click();
+        DemoPause.pause();
     }
 
     public boolean showsInvalidLogin() {

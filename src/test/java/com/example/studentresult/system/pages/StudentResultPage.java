@@ -20,6 +20,7 @@ public class StudentResultPage {
     public void open(String baseUrl) {
         driver.get(baseUrl + "/student-results");
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("studentNumber")));
+        DemoPause.pause();
     }
 
     public void search(String studentNumber) {
@@ -27,6 +28,7 @@ public class StudentResultPage {
         driver.findElement(By.id("studentNumber")).sendKeys(studentNumber);
         driver.findElement(By.id("searchResults")).click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("studentResultsTable")));
+        DemoPause.pause();
     }
 
     public boolean hasResultsTable() {
